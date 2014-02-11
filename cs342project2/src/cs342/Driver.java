@@ -1,4 +1,4 @@
-package cs342project2;
+package cs342;
 
 import java.io.IOException;
 
