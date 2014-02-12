@@ -31,8 +31,6 @@ public class MainWindow extends JFrame {
 		file.add(newGame);
 		help.add(F1);
 		setJMenuBar(menuBar);
-		BorderLayout bl = new BorderLayout();
-		setLayout(bl);
 
 		setLayout(new GridLayout(x,y));
 		for(int i=0; i<x; i++){
@@ -40,12 +38,47 @@ public class MainWindow extends JFrame {
 				buttonGrid[i][j]= new JButton();
 				add(buttonGrid[i][j]);
 				buttonGrid[i][j].addActionListener(new MainWindowListener());
+				buttonGrid[i][j].addMouseListener(new MainMouseListener());
 			}
 		}
 		pack();
 		setVisible(true);
 	}
+	private class MainMouseListener implements MouseListener{
+		@Override
+		public void mouseClicked(MouseEvent e) {
+			// TODO Auto-generated method stub
+			for(int i=0; i<8; i++)
+			{
+				for(int j=0; j<8; j++)
+				{
+					if(buttonGrid[i][j] == e.getSource())
+					{
+						if(SwingUtilities.isRightMouseButton(e) && e.getClickCount() == 1){
+							if(buttonGrid[i][j].isEnabled()){
+								buttonGrid[i][j].setEnabled(false);
+							}else{
+								buttonGrid[i][j].setEnabled(true);
+							}
+						}
+					}
 
+				}
+			}
+		}
+
+		@Override
+		public void mouseEntered(MouseEvent e) {		}
+
+		@Override
+		public void mouseExited(MouseEvent e) {		 }
+		
+		@Override
+		public void mousePressed(MouseEvent e) {		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {		}
+	}
 	private class MainWindowListener implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent e) 
