@@ -5,6 +5,7 @@ public class MinesweeperBoard {
 	private boolean[][] revealed;
 	private int length=0;
 	private int width=0;
+	private int mines;
 	/*
 	 *
 grid = [n,m]   // initialize all cells to 0
@@ -18,11 +19,12 @@ for k = 1 to number_of_mines
             increment grid[mine_x + x, mine_y + y] by 1
 
 	 */
-	public MinesweeperBoard(int x, int y, int mines){
+	public MinesweeperBoard(int x, int y, int m){
 		board = new int[x][y];
 		revealed = new boolean[x][y];
 		length=x;
 		width=y;
+		mines=m;
 		Random rn = new Random();
 		for(int k=1; k<mines; k++)
 		{
@@ -46,7 +48,7 @@ for k = 1 to number_of_mines
 							continue;
 						board[mine_x+i][mine_y+j]++;
 					}
-					System.out.println(i + " "+ j);
+					//System.out.println(i + " "+ j);
 				}
 
 			}
@@ -55,24 +57,32 @@ for k = 1 to number_of_mines
 	
 	public int get(int x, int y){
 		if(x<0 || y<0)
-			return -1;
-		if(x>length || y > length)
-			return -1;
+			return -9999;
+		if(x > length || y > width)
+			return -9999;
 		return board[x][y];
 	}
 
 	public boolean revealed(int x, int y){
 		if(x<0 || y<0)
 			return false;
-		if(x>length || y > length)
+		if(x>length || y > width)
 			return false;
 		return revealed[x][y];
 	}
-
+	public int length(){
+		return length;
+	}
+	public int width(){
+		return width;
+	}
+	public int getMines(){
+		return mines;
+	}
 	public void setVisible(int x, int y){
 		if(x<0 || y<0)
 			return;
-		if(x>length || y > length)
+		if(x>length || y > width)
 			return;
 		revealed[x][y]=true;
 	}
