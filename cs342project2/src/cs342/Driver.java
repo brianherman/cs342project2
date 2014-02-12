@@ -8,7 +8,7 @@ public class Driver {
 	public static void main(String args[])
 	{
 		try {
-			MainWindow mw = new MainWindow(16,16,20);
+			MainWindow mw = new MainWindow(10,10,10);
 			mw.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

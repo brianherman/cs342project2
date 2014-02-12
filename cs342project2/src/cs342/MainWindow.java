@@ -48,12 +48,17 @@ public class MainWindow extends JFrame {
 
 	private class MainWindowListener implements ActionListener{
 		@Override
-		public void actionPerformed(ActionEvent e) {
-			for(int i=0; i<8; i++){
-				for(int j=0; j<8; j++){
+		public void actionPerformed(ActionEvent e) 
+		{
+			for(int i=0; i<8; i++)
+			{
+				for(int j=0; j<8; j++)
+				{
 					if(buttonGrid[i][j] == e.getSource())
 					{
 						reveal(i,j);
+						if(board.get(i, j)<0)
+							System.out.println("boom");
 					}
 				}
 			}
@@ -82,8 +87,6 @@ public class MainWindow extends JFrame {
 						reveal(i,j-1);
 					if((j+1) < board.width())
 						reveal(i,j+1);
-				}else if(board.get(i, j)<0){
-					System.out.println("boom");
 				}else{
 					return;
 				}
