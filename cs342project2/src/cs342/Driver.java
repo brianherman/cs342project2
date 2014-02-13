@@ -7,12 +7,7 @@ import javax.swing.JFrame;
 public class Driver {
 	public static void main(String args[])
 	{
-		try {
-			MainWindow mw = new MainWindow(10,10,10);
-			mw.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		MainWindow mw = new MainWindow(10,10,10);
+		mw.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 }

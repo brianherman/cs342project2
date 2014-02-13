@@ -57,9 +57,9 @@ for k = 1 to number_of_mines
 	
 	public int get(int x, int y){
 		if(x<0 || y<0)
-			return -9999;
+			return -1;
 		if(x > length || y > width)
-			return -9999;
+			return -1;
 		return board[x][y];
 	}
 

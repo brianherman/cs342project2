@@ -15,8 +15,14 @@ public class MainWindow extends JFrame {
 	private JMenuBar menuBar;
 	private JMenu file, help;
 	private JMenuItem newGame, F1;
-
-	public MainWindow(int x, int y, int numberOfMines) throws IOException{
+	private JPanel top;
+	private JPanel bottom;
+	private JLabel score;
+	private JLabel timer;
+	public MainWindow(int x, int y, int numberOfMines){
+		super("Minesweeper");
+		MainWindowListener mwl = new MainWindowListener();
+		MainMouseListener mml = new MainMouseListener();
 
 		board = new MinesweeperBoard(x,y,numberOfMines);
 		buttonGrid = new JButton[x][y];
@@ -26,31 +32,42 @@ public class MainWindow extends JFrame {
 		menuBar.add(file);
 		menuBar.add(help);
 		newGame = new JMenuItem("New Game");
-		newGame.addActionListener(new MainWindowListener());
+		newGame.addActionListener(mwl);
 		F1 = new JMenuItem("Help");
 		file.add(newGame);
 		help.add(F1);
 		setJMenuBar(menuBar);
+		top = new JPanel(new BorderLayout());
+		bottom = new JPanel(new GridLayout(x,y));
+		setLayout(new BorderLayout());
+		
+		score = new JLabel("010");
+		timer = new JLabel("000");
+		score.setFont(new Font("Courier",Font.BOLD,32));
+		timer.setFont(new Font("Courier",Font.BOLD,32));
 
-		setLayout(new GridLayout(x,y));
+		top.add(score,BorderLayout.LINE_START);
+		
+		top.add(timer,BorderLayout.LINE_END);
 		for(int i=0; i<x; i++){
 			for(int j=0; j<y; j++){
 				buttonGrid[i][j]= new JButton();
-				add(buttonGrid[i][j]);
-				buttonGrid[i][j].addActionListener(new MainWindowListener());
-				buttonGrid[i][j].addMouseListener(new MainMouseListener());
+				bottom.add(buttonGrid[i][j]);
+				buttonGrid[i][j].addActionListener(mwl);
+				buttonGrid[i][j].addMouseListener(mml);
 			}
 		}
+		add(top,BorderLayout.PAGE_START);
+		add(bottom, BorderLayout.CENTER);
 		pack();
 		setVisible(true);
 	}
 	private class MainMouseListener implements MouseListener{
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			// TODO Auto-generated method stub
-			for(int i=0; i<8; i++)
+			for(int i=0; i<10; i++)
 			{
-				for(int j=0; j<8; j++)
+				for(int j=0; j<10; j++)
 				{
 					if(buttonGrid[i][j] == e.getSource())
 					{
@@ -83,15 +100,23 @@ public class MainWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) 
 		{
-			for(int i=0; i<8; i++)
+			for(int i=0; i<10; i++)
 			{
-				for(int j=0; j<8; j++)
+				for(int j=0; j<10; j++)
 				{
 					if(buttonGrid[i][j] == e.getSource())
 					{
-						reveal(i,j);
+						System.out.println(board.get(i, j));
 						if(board.get(i, j)<0)
-							System.out.println("boom");
+						{	
+							JOptionPane.showMessageDialog(null, "You Lose.");
+							buttonGrid[i][j].setText(Integer.toString(board.get(i,j)));
+						}else if(board.get(i, j)>0){
+							buttonGrid[i][j].setText(Integer.toString(board.get(i,j)));
+						}else{
+							reveal(i,j);
+						}
+						
 					}
 				}
 			}
@@ -107,8 +132,8 @@ public class MainWindow extends JFrame {
 		}
 		public void reveal(int i, int j)
 		{
-			if(i>=0 && j>=0 || i<=board.length() && j<=board.width()){
-				if(board.get(i, j)>=0 && board.revealed(i, j)==false)
+			if(i>=0 && j>=0 || i<board.length() && j<board.width()){
+				if(board.get(i, j)==0 && board.revealed(i, j)==false)
 				{
 					board.setVisible(i, j);
 					buttonGrid[i][j].setText(Integer.toString(board.get(i,j)));
@@ -120,6 +145,9 @@ public class MainWindow extends JFrame {
 						reveal(i,j-1);
 					if((j+1) < board.width())
 						reveal(i,j+1);
+				}else if(board.get(i, j)>0 && board.revealed(i, j)==false){
+					board.setVisible(i, j);
+					buttonGrid[i][j].setText(Integer.toString(board.get(i,j)));
 				}else{
 					return;
 				}
