@@ -10,32 +10,42 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class MainWindow extends JFrame {
+	
 	private MinesweeperBoard board;
 	private JButton[][] buttonGrid;
 	private JMenuBar menuBar;
 	private JMenu file, help;
-	private JMenuItem newGame, F1;
+	private JMenuItem newGame, exit, topTen;
 	private JPanel top;
 	private JPanel bottom;
 	private JLabel score;
 	private JLabel timer;
+	
+	public static void main(String args[])
+	{
+		MainWindow mw = new MainWindow(10,10,10);
+		mw.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
+	
 	public MainWindow(int x, int y, int numberOfMines){
 		super("Minesweeper");
 		MainWindowListener mwl = new MainWindowListener();
 		MainMouseListener mml = new MainMouseListener();
-
+		
 		board = new MinesweeperBoard(x,y,numberOfMines);
 		buttonGrid = new JButton[x][y];
 		menuBar = new JMenuBar();
 		file = new JMenu("File");
-		help = new JMenu("Help");
 		menuBar.add(file);
-		menuBar.add(help);
 		newGame = new JMenuItem("New Game");
+		topTen = new JMenuItem("Top Ten Scores");
+		exit = new JMenuItem("Exit");
+		topTen.addActionListener(mwl);
 		newGame.addActionListener(mwl);
-		F1 = new JMenuItem("Help");
+		exit.addActionListener(mwl);
 		file.add(newGame);
-		help.add(F1);
+		file.add(topTen);
+		file.add(exit);
 		setJMenuBar(menuBar);
 		top = new JPanel(new BorderLayout());
 		bottom = new JPanel(new GridLayout(x,y));
@@ -88,7 +98,7 @@ public class MainWindow extends JFrame {
 		public void mouseEntered(MouseEvent e) {		}
 
 		@Override
-		public void mouseExited(MouseEvent e) {		 }
+		public void mouseExited(MouseEvent e) {		    }
 		
 		@Override
 		public void mousePressed(MouseEvent e) {		}
@@ -128,7 +138,15 @@ public class MainWindow extends JFrame {
 						buttonGrid[i][j].setText(" ");
 					}
 				}
+				
+			
 			}
+			if(topTen==e.getSource()){
+			}
+			if(exit==e.getSource()){
+				System.exit(0);
+			}
+			
 		}
 		public void reveal(int i, int j)
 		{
