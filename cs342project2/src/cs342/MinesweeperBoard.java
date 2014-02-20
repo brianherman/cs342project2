@@ -26,7 +26,7 @@ for k = 1 to number_of_mines
 		width=y;
 		mines=m;
 		Random rn = new Random();
-		for(int k=1; k<mines; k++)
+		for(int k=1; k<=mines; k++)
 		{
 			int mine_x, mine_y;
 			while(true){
@@ -78,6 +78,17 @@ for k = 1 to number_of_mines
 	}
 	public int getMines(){
 		return mines;
+	}
+	public boolean isWon(){
+		int numOfUnopenedCells=0;
+		for(int i=0; i<length; i++){
+			for(int j=0; j<width; j++){
+				if(revealed[i][j]==true)
+						numOfUnopenedCells++;
+			}
+		}
+		
+		return (length*width-numOfUnopenedCells-1) == mines;
 	}
 	public void setVisible(int x, int y){
 		if(x<0 || y<0)

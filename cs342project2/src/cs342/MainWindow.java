@@ -6,76 +6,111 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 
 public class MainWindow extends JFrame {
-	
+
 	private MinesweeperBoard board;
 	private JButton[][] buttonGrid;
 	private JMenuBar menuBar;
 	private JMenu file, help;
-	private JMenuItem newGame, exit, topTen;
+	private JMenuItem newGame, exit, topTen, helpMenu;
 	private JPanel top;
 	private JPanel bottom;
-	private JLabel score;
+	private JLabel flags;
 	private JLabel timer;
-	private int[] topTenScores = new int[10];
+	private ArrayList<Player> topTenScores = new ArrayList<Player>();
 	private boolean lost = false;
+	private Timer Jtimer;
+	private int time=0;
+	private int flagsCounter = 10;
 	
 	public static void main(String args[])
 	{
 		MainWindow mw = new MainWindow(10,10,10);
 		mw.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
-	
+
 	public MainWindow(int x, int y, int numberOfMines){
 		super("Minesweeper");
+		//Create the listeners
 		MainWindowListener mwl = new MainWindowListener();
 		MainMouseListener mml = new MainMouseListener();
-		
+
 		board = new MinesweeperBoard(x,y,numberOfMines);
 		buttonGrid = new JButton[x][y];
+		//Setup the menu bar
 		menuBar = new JMenuBar();
 		file = new JMenu("File");
+		help = new JMenu("Help");
+
 		menuBar.add(file);
+		menuBar.add(help);
+		
 		newGame = new JMenuItem("New Game");
 		topTen = new JMenuItem("Top Ten Scores");
+		helpMenu = new JMenuItem("Minesweeper Help");
 		exit = new JMenuItem("Exit");
+		
 		topTen.addActionListener(mwl);
 		newGame.addActionListener(mwl);
 		exit.addActionListener(mwl);
+		helpMenu.addActionListener(mwl);
+		
 		file.add(newGame);
 		file.add(topTen);
 		file.add(exit);
+		
+		help.add(helpMenu);
+		
 		setJMenuBar(menuBar);
+		//end setup of the menubar
+		//setup the layouts one will be 
 		top = new JPanel(new BorderLayout());
 		bottom = new JPanel(new GridLayout(x,y));
 		setLayout(new BorderLayout());
-		
-		score = new JLabel("010");
+
+		flags = new JLabel("010");
 		timer = new JLabel("000");
-		score.setFont(new Font("Courier",Font.BOLD,32));
+		flags.setFont(new Font("Courier",Font.BOLD,32));
 		timer.setFont(new Font("Courier",Font.BOLD,32));
 
-		top.add(score,BorderLayout.LINE_START);
-		
+		top.add(flags,BorderLayout.LINE_START);
+
 		top.add(timer,BorderLayout.LINE_END);
+		
+		//Add the buttons
 		for(int i=0; i<x; i++){
 			for(int j=0; j<y; j++){
 				buttonGrid[i][j]= new JButton();
 				bottom.add(buttonGrid[i][j]);
 				buttonGrid[i][j].addActionListener(mwl);
 				buttonGrid[i][j].addMouseListener(mml);
-				  
+				buttonGrid[i][j].setText(String.valueOf(board.get(i, j)));
 			}
 		}
+		//add the layouts to the main layout
 		add(top,BorderLayout.PAGE_START);
 		add(bottom, BorderLayout.CENTER);
+		//Start the timer
+		int delay = 1000; //milliseconds
+		ActionListener taskPerformer = new ActionListener() {
+
+			public void actionPerformed(ActionEvent evt) {
+				timer.setText(String.valueOf(time++));
+			}
+
+		};
+		Jtimer = new Timer(delay, taskPerformer);
+
 		pack();
 		setVisible(true);
 	}
 	private class MainMouseListener implements MouseListener{
 		@Override
 		public void mouseClicked(MouseEvent e) {
+			//This creates support for flags
 			for(int i=0; i<10; i++)
 			{
 				for(int j=0; j<10; j++)
@@ -85,9 +120,13 @@ public class MainWindow extends JFrame {
 						if(SwingUtilities.isRightMouseButton(e) && e.getClickCount() == 1){
 							if(buttonGrid[i][j].isEnabled()){
 								buttonGrid[i][j].setEnabled(false);
+								flagsCounter--;
 							}else{
+								flagsCounter++;
 								buttonGrid[i][j].setEnabled(true);
 							}
+							flags.setText(String.valueOf(flagsCounter));
+
 						}
 					}
 
@@ -100,7 +139,7 @@ public class MainWindow extends JFrame {
 
 		@Override
 		public void mouseExited(MouseEvent e) {		    }
-		
+
 		@Override
 		public void mousePressed(MouseEvent e) {		}
 
@@ -111,52 +150,97 @@ public class MainWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) 
 		{
+			//If the lost flag is false then preform the action
 			if(!lost){
-			for(int i=0; i<10; i++)
-			{
-				for(int j=0; j<10; j++)
+				if(board.isWon()){
+					while(true){
+						String playerName = (String)JOptionPane.showInputDialog(
+								null,
+								"Enter Your Name:\n",
+								"Customized Dialog",
+								JOptionPane.PLAIN_MESSAGE,
+								null,
+								null,
+								"");
+
+						//If a string was returned, say so.
+						if ((playerName != null) && (playerName.length() > 0)) {
+							topTenScores.add(new Player(playerName,time));
+							break;
+						}
+					}
+
+				}
+				for(int i=0; i<10; i++)
 				{
-					if(buttonGrid[i][j] == e.getSource())
+					for(int j=0; j<10; j++)
 					{
-						System.out.println(board.get(i, j));
-						if(board.get(i, j)<0)
-						{	
-							JOptionPane.showMessageDialog(null, "You Lose.");
-							lost=true;
-							try {
-							    Image img = ImageIO.read(getClass().getResource("/bombrevealed.gif"));
-							    buttonGrid[i][j].setIcon(new ImageIcon(img));
-						} catch (IOException ex) {
+						if(buttonGrid[i][j] == e.getSource())
+						{
+							if(board.get(i, j)<0)
+							{	
+								Jtimer.stop();
+								JOptionPane.showMessageDialog(null, "You Lose.");
+								lost=true;
+								//read in the image and set the icon of the bomb
+								try {
+									Image img = ImageIO.read(getClass().getResource("/bombrevealed.gif"));
+									buttonGrid[i][j].setIcon(new ImageIcon(img));
+								} catch (IOException ex) {
+									ex.printStackTrace();
+								}
+							}else if(board.get(i, j)>0){
+								// if there isnt a bomb display the number corresponding to the
+								// location of the bomb
+								Jtimer.start();
+								buttonGrid[i][j].setText(Integer.toString(board.get(i,j)));
+								board.setVisible(i, j);
+							}else{
+								//if the grid is 0 then reveal the buttons
+								Jtimer.start();
+								reveal(i,j);
+							}
+
 						}
-							//buttonGrid[i][j].setText(Integer.toString(board.get(i,j)));
-						}else if(board.get(i, j)>0){
-							
-							buttonGrid[i][j].setText(Integer.toString(board.get(i,j)));
-						}else{
-							reveal(i,j);
-						}
-						
 					}
 				}
 			}
-
 			if(newGame==e.getSource()){
+				//reset all variables
+				lost=false;
+				time=0;
+				timer.setText("0");
+				//create a new board
 				board = new MinesweeperBoard(board.length(),board.width(),board.getMines());
+				//clear the board.
 				for(int i=0; i<board.length(); i++){
 					for(int j=0; j<board.width(); j++){
 						buttonGrid[i][j].setText(" ");
+						buttonGrid[i][j].setIcon(null);
 					}
 				}
-				
-			
+
+
 			}
 			if(topTen==e.getSource()){
+				Collections.sort(topTenScores);
+				String players= "";
+				for(int i=0; i<topTenScores.size(); i++){
+					players=players+" " + i + ": "+ topTenScores.get(i).toString();
+				}
+				if(topTenScores.size()==0)
+					players="No scores.";
+				JOptionPane.showMessageDialog(null, players);
 			}
 			if(exit==e.getSource()){
 				System.exit(0);
 			}
+			if(helpMenu == e.getSource())
+			{
+				JOptionPane.showMessageDialog(null, "The purpose of the game is to reveal all the squares excluding the mines.\n"
+						+ " Left click to reveal a square/bomb. Right click to mark a bomb. Good Luck!");
 			}
-			
+			//System.out.println(board.isWon());
 		}
 		public void reveal(int i, int j)
 		{
@@ -183,35 +267,3 @@ public class MainWindow extends JFrame {
 		}
 	}
 }
-//		public void reveal(int i, int j){
-//			Queue<Cell> q = new LinkedList<Cell>();
-//			q.add(new Cell(i,j));
-//			if(board.get(i,j)<0){
-//			}
-//			while(!q.isEmpty()){
-//				Cell current = q.poll();
-//				if(board.get(current.getX(),current.getY())==0 &&
-//						board.revealed(current.getX(),current.getY())==false)
-//				{
-//					if(i+1 < board.length())
-//						q.add(new Cell(i+1,j));
-//					if(i-1 > 0)
-//						q.add(new Cell(i-1,j));
-//					if(j-1 > 0)
-//						q.add(new Cell(i,j-1));
-//					if(j+1 < board.width())
-//						q.add(new Cell(i,j+1));
-//					if(i+1<board.length() && j+1<board.width())
-//						q.add(new Cell(i+1,j+1));
-//					if(i-1>0 && j-1>0)
-//						q.add(new Cell(i-1,j-1));
-//					if(i+1<board.length() && j-1>0)
-//						q.add(new Cell(i+1,j-1));
-//					if(i-1>0 && j+1<board.width())
-//						q.add(new Cell(i-1,j+1));
-//				}
-//				board.setVisible(current.getX(),current.getY());
-//				buttonGrid[current.getX()][current.getY()].setText(Integer.toString(board.get(current.getX(),current.getY())));
-//			}
-//		}
-//	}
