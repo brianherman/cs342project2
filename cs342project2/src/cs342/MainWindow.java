@@ -5,6 +5,7 @@ import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -21,11 +22,11 @@ public class MainWindow extends JFrame {
 	private JLabel flags;
 	private JLabel timer;
 	private ArrayList<Player> topTenScores = new ArrayList<Player>();
-	private boolean lost = false;
+	private boolean gameEnded = false;
 	private Timer Jtimer;
 	private int time=0;
 	private int flagsCounter = 10;
-	
+
 	public static void main(String args[])
 	{
 		MainWindow mw = new MainWindow(10,10,10);
@@ -42,28 +43,29 @@ public class MainWindow extends JFrame {
 		buttonGrid = new JButton[x][y];
 		//Setup the menu bar
 		menuBar = new JMenuBar();
-		file = new JMenu("File");
+		file = new JMenu("Game");
 		help = new JMenu("Help");
-
+		file.setMnemonic('G');
 		menuBar.add(file);
 		menuBar.add(help);
-		
-		newGame = new JMenuItem("New Game");
+
+		newGame = new JMenuItem("Reset");
+		newGame.setMnemonic('R');
 		topTen = new JMenuItem("Top Ten Scores");
 		helpMenu = new JMenuItem("Minesweeper Help");
 		exit = new JMenuItem("Exit");
-		
+
 		topTen.addActionListener(mwl);
 		newGame.addActionListener(mwl);
 		exit.addActionListener(mwl);
 		helpMenu.addActionListener(mwl);
-		
+
 		file.add(newGame);
 		file.add(topTen);
 		file.add(exit);
-		
+
 		help.add(helpMenu);
-		
+
 		setJMenuBar(menuBar);
 		//end setup of the menubar
 		//setup the layouts one will be 
@@ -79,7 +81,7 @@ public class MainWindow extends JFrame {
 		top.add(flags,BorderLayout.LINE_START);
 
 		top.add(timer,BorderLayout.LINE_END);
-		
+
 		//Add the buttons
 		for(int i=0; i<x; i++){
 			for(int j=0; j<y; j++){
@@ -87,7 +89,7 @@ public class MainWindow extends JFrame {
 				bottom.add(buttonGrid[i][j]);
 				buttonGrid[i][j].addActionListener(mwl);
 				buttonGrid[i][j].addMouseListener(mml);
-				buttonGrid[i][j].setText(String.valueOf(board.get(i, j)));
+				//buttonGrid[i][j].setText(String.valueOf(board.get(i, j)));
 			}
 		}
 		//add the layouts to the main layout
@@ -146,31 +148,14 @@ public class MainWindow extends JFrame {
 		@Override
 		public void mouseReleased(MouseEvent e) {		}
 	}
+
+
 	private class MainWindowListener implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent e) 
 		{
 			//If the lost flag is false then preform the action
-			if(!lost){
-				if(board.isWon()){
-					while(true){
-						String playerName = (String)JOptionPane.showInputDialog(
-								null,
-								"Enter Your Name:\n",
-								"Customized Dialog",
-								JOptionPane.PLAIN_MESSAGE,
-								null,
-								null,
-								"");
-
-						//If a string was returned, say so.
-						if ((playerName != null) && (playerName.length() > 0)) {
-							topTenScores.add(new Player(playerName,time));
-							break;
-						}
-					}
-
-				}
+			if(!gameEnded){
 				for(int i=0; i<10; i++)
 				{
 					for(int j=0; j<10; j++)
@@ -181,7 +166,7 @@ public class MainWindow extends JFrame {
 							{	
 								Jtimer.stop();
 								JOptionPane.showMessageDialog(null, "You Lose.");
-								lost=true;
+								gameEnded=true;
 								//read in the image and set the icon of the bomb
 								try {
 									Image img = ImageIO.read(getClass().getResource("/bombrevealed.gif"));
@@ -201,13 +186,35 @@ public class MainWindow extends JFrame {
 								reveal(i,j);
 							}
 
+							if(board.isWon()){
+								while(true){
+									String playerName = (String)JOptionPane.showInputDialog(
+											null,
+											"Enter Your Name:\n",
+											"Customized Dialog",
+											JOptionPane.PLAIN_MESSAGE,
+											null,
+											null,
+											"");
+
+									//If a string was returned, say so.
+									if ((playerName != null) && (playerName.length() > 0)) {
+										topTenScores.add(new Player(playerName,time));
+										break;
+										//exit the loop
+									}
+									gameEnded=true;
+								}
+							}
 						}
 					}
 				}
+				
+
 			}
 			if(newGame==e.getSource()){
 				//reset all variables
-				lost=false;
+				gameEnded=false;
 				time=0;
 				timer.setText("0");
 				//create a new board
@@ -219,8 +226,7 @@ public class MainWindow extends JFrame {
 						buttonGrid[i][j].setIcon(null);
 					}
 				}
-
-
+				
 			}
 			if(topTen==e.getSource()){
 				Collections.sort(topTenScores);
@@ -228,8 +234,9 @@ public class MainWindow extends JFrame {
 				for(int i=0; i<topTenScores.size(); i++){
 					players=players+" " + i + ": "+ topTenScores.get(i).toString();
 				}
-				if(topTenScores.size()==0)
+				if(topTenScores.size()==0){
 					players="No scores.";
+				}
 				JOptionPane.showMessageDialog(null, players);
 			}
 			if(exit==e.getSource()){
@@ -240,8 +247,8 @@ public class MainWindow extends JFrame {
 				JOptionPane.showMessageDialog(null, "The purpose of the game is to reveal all the squares excluding the mines.\n"
 						+ " Left click to reveal a square/bomb. Right click to mark a bomb. Good Luck!");
 			}
-			//System.out.println(board.isWon());
 		}
+
 		public void reveal(int i, int j)
 		{
 			if(i>=0 && j>=0 || i<board.length() && j<board.width()){

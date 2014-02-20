@@ -6,6 +6,7 @@ public class MinesweeperBoard {
 	private int length=0;
 	private int width=0;
 	private int mines;
+	private int numOfRevealed;
 	/*
 	 *
 grid = [n,m]   // initialize all cells to 0
@@ -22,6 +23,7 @@ for k = 1 to number_of_mines
 	public MinesweeperBoard(int x, int y, int m){
 		board = new int[x][y];
 		revealed = new boolean[x][y];
+		numOfRevealed=0;
 		length=x;
 		width=y;
 		mines=m;
@@ -80,21 +82,15 @@ for k = 1 to number_of_mines
 		return mines;
 	}
 	public boolean isWon(){
-		int numOfUnopenedCells=0;
-		for(int i=0; i<length; i++){
-			for(int j=0; j<width; j++){
-				if(revealed[i][j]==true)
-						numOfUnopenedCells++;
-			}
-		}
-		
-		return (length*width-numOfUnopenedCells-1) == mines;
+		System.out.println(numOfRevealed);
+		return (length*width-numOfRevealed) == mines;
 	}
 	public void setVisible(int x, int y){
 		if(x<0 || y<0)
 			return;
 		if(x>length || y > width)
 			return;
+		numOfRevealed++;
 		revealed[x][y]=true;
 	}
 }
