@@ -1,13 +1,11 @@
 package cs342;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.Queue;
 
 public class MainWindow extends JFrame {
 	
@@ -20,6 +18,8 @@ public class MainWindow extends JFrame {
 	private JPanel bottom;
 	private JLabel score;
 	private JLabel timer;
+	private int[] topTenScores = new int[10];
+	private boolean lost = false;
 	
 	public static void main(String args[])
 	{
@@ -65,6 +65,7 @@ public class MainWindow extends JFrame {
 				bottom.add(buttonGrid[i][j]);
 				buttonGrid[i][j].addActionListener(mwl);
 				buttonGrid[i][j].addMouseListener(mml);
+				  
 			}
 		}
 		add(top,BorderLayout.PAGE_START);
@@ -110,6 +111,7 @@ public class MainWindow extends JFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) 
 		{
+			if(!lost){
 			for(int i=0; i<10; i++)
 			{
 				for(int j=0; j<10; j++)
@@ -120,8 +122,15 @@ public class MainWindow extends JFrame {
 						if(board.get(i, j)<0)
 						{	
 							JOptionPane.showMessageDialog(null, "You Lose.");
-							buttonGrid[i][j].setText(Integer.toString(board.get(i,j)));
+							lost=true;
+							try {
+							    Image img = ImageIO.read(getClass().getResource("/bombrevealed.gif"));
+							    buttonGrid[i][j].setIcon(new ImageIcon(img));
+						} catch (IOException ex) {
+						}
+							//buttonGrid[i][j].setText(Integer.toString(board.get(i,j)));
 						}else if(board.get(i, j)>0){
+							
 							buttonGrid[i][j].setText(Integer.toString(board.get(i,j)));
 						}else{
 							reveal(i,j);
@@ -145,6 +154,7 @@ public class MainWindow extends JFrame {
 			}
 			if(exit==e.getSource()){
 				System.exit(0);
+			}
 			}
 			
 		}
