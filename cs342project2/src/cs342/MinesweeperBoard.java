@@ -8,17 +8,16 @@ public class MinesweeperBoard {
 	private int mines;
 	private int numOfRevealed;
 	/*
-	 *
-grid = [n,m]   // initialize all cells to 0
-for k = 1 to number_of_mines
-   get random mine_x and mine_y where grid(mine_x, mine_y) is not a mine
-   for x = -1 to 1
-      for y = -1 to 1
-         if x = 0 and y = 0 then
-            grid[mine_x, mine_y] = -number_of_mines  // negative value = mine
-         else 
-            increment grid[mine_x + x, mine_y + y] by 1
-
+	 * Pseudo code to generate the board.
+	 *	grid = [n,m]   // initialize all cells to 0
+	 *	for k = 1 to number_of_mines
+	 *	   get random mine_x and mine_y where grid(mine_x, mine_y) is not a mine
+	 *	   for x = -1 to 1
+	 *	      for y = -1 to 1
+	 *	         if x = 0 and y = 0 then
+	 *	            grid[mine_x, mine_y] = -number_of_mines  // negative value = mine
+	 *	         else 
+	 *	            increment grid[mine_x + x, mine_y + y] by 1
 	 */
 	public MinesweeperBoard(int x, int y, int m){
 		board = new int[x][y];
@@ -28,8 +27,9 @@ for k = 1 to number_of_mines
 		width=y;
 		mines=m;
 		Random rn = new Random();
-		for(int k=1; k<=mines; k++)
-		{
+		
+		/*For loop to set the mines*/
+		for(int k=1; k<=mines; k++) {
 			int mine_x, mine_y;
 			while(true){
 				mine_x = rn.nextInt(x);
@@ -38,8 +38,9 @@ for k = 1 to number_of_mines
 					break;
 			}
 			//System.out.println(mine_x +" " + mine_y);
-			for(int i=-1; i<2; i++)
-			{
+			
+			/*Sets the numbers on the board*/
+			for(int i=-1; i<2; i++) {
 				//System.out.println(i);
 				for(int j=-1; j<2; j++){
 					if (i==0 && j==0){
@@ -56,7 +57,9 @@ for k = 1 to number_of_mines
 			}
 		}
 	}
+/*************************************/
 	
+	/*Gets the cell from the board*/
 	public int get(int x, int y){
 		if(x<0 || y<0)
 			return -1;
@@ -64,7 +67,8 @@ for k = 1 to number_of_mines
 			return -1;
 		return board[x][y];
 	}
-
+	
+	/*Checks to see if the cell is revealed*/
 	public boolean revealed(int x, int y){
 		if(x<0 || y<0)
 			return false;
@@ -72,6 +76,7 @@ for k = 1 to number_of_mines
 			return false;
 		return revealed[x][y];
 	}
+	/*Gets the length & width & mines of the board*/
 	public int length(){
 		return length;
 	}
@@ -81,10 +86,13 @@ for k = 1 to number_of_mines
 	public int getMines(){
 		return mines;
 	}
+	
+	/*Checks to see if the user won*/
 	public boolean isWon(){
 		System.out.println(numOfRevealed);
 		return (length*width-numOfRevealed) == mines;
 	}
+	/*Makes a cell visible*/
 	public void setVisible(int x, int y){
 		if(x<0 || y<0)
 			return;

@@ -11,11 +11,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class MainWindow extends JFrame {
-
+/*Declaring the objects*/
 	private MinesweeperBoard board;
 	private JButton[][] buttonGrid;
 	private JMenuBar menuBar;
-	private JMenu file, help;
+	private JMenu game, help;
 	private JMenuItem newGame, exit, topTen, helpMenu, about, resetScores;
 	private JPanel top;
 	private JPanel bottom;
@@ -26,34 +26,46 @@ public class MainWindow extends JFrame {
 	private Timer Jtimer;
 	private int time = 0;
 	private int flagsCounter = 10;
+	private int counter[][] = new int[10][10];
 
+/*****************************************/
+	
 	public static void main(String args[])
 	{
+		/*For Mac Users, sets the menu bar on the top*/
 		if (System.getProperty("os.name").contains("Mac")) {
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
 		}
+		/*Creates the window*/
 		MainWindow mw = new MainWindow(10,10,10);
 		mw.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
-
+	/*****************************************/
+	/*
+	 * Making the main window functional
+	 */
 	public MainWindow(int x, int y, int numberOfMines){
+		/*Puts the name on top of the window*/
 		super("Minesweeper");
-		//Create the listeners
+		
+		/*Create the listeners*/
 		MainWindowListener mwl = new MainWindowListener();
 		MainMouseListener mml = new MainMouseListener();
-
+		
+		/*Creates the board data*/
 		board = new MinesweeperBoard(x,y,numberOfMines);
 		buttonGrid = new JButton[x][y];
-		//Setup the menu bar
+		/*Setup the menu bar*/
 		menuBar = new JMenuBar();
-		//top level menu bars
-		file = new JMenu("Game");
+		/*Top Level Menu-Game options, Help Options*/
+		game = new JMenu("Game");
 		help = new JMenu("Help");
 		help.setMnemonic('H');
-		file.setMnemonic('G');
-		menuBar.add(file);
+		game.setMnemonic('G');
+		menuBar.add(game);
 		menuBar.add(help);
-
+		
+		/*The Game Menu*/
 		newGame = new JMenuItem("Reset");
 		newGame.setMnemonic('R');
 		topTen = new JMenuItem("Top Ten Scores");
@@ -66,7 +78,8 @@ public class MainWindow extends JFrame {
 		about.setMnemonic('A');
 		exit = new JMenuItem("Exit");
 		exit.setMnemonic('X');
-
+		
+		/*Listeners for all the menus*/
 		topTen.addActionListener(mwl);
 		newGame.addActionListener(mwl);
 		exit.addActionListener(mwl);
@@ -74,31 +87,34 @@ public class MainWindow extends JFrame {
 		about.addActionListener(mwl);
 		resetScores.addActionListener(mwl);
 
-		file.add(newGame);
-		file.add(topTen);
-		file.add(resetScores);
-		file.add(exit);
-
+		/*Adding them to the game menu*/
+		game.add(newGame);
+		game.add(topTen);
+		game.add(resetScores);
+		game.add(exit);
+		
+		/*Adding them to the help menu*/
 		help.add(helpMenu);
 		help.add(about);
 
 		setJMenuBar(menuBar);
-		//end setup of the menubar
-		//setup the layouts one will be 
+		/*end setup of the menubar*/
+		
+		/*setup the layouts*/ 
 		top = new JPanel(new BorderLayout());
 		bottom = new JPanel(new GridLayout(x,y));
 		setLayout(new BorderLayout());
 
+		/*Shows the number of flags and the timer*/
 		flags = new JLabel("010");
 		timer = new JLabel("000");
 		flags.setFont(new Font("Courier",Font.BOLD,32));
 		timer.setFont(new Font("Courier",Font.BOLD,32));
-
+		/*Adds them to the Jpanel*/
 		top.add(flags,BorderLayout.LINE_START);
-
 		top.add(timer,BorderLayout.LINE_END);
 
-		//Add the buttons
+		/*Creates all the buttons*/ 
 		for(int i=0; i<x; i++){
 			for(int j=0; j<y; j++){
 				buttonGrid[i][j]= new JButton();
@@ -108,37 +124,42 @@ public class MainWindow extends JFrame {
 				//buttonGrid[i][j].setText(String.valueOf(board.get(i, j)));
 			}
 		}
-		//add the layouts to the main layout
+		
+		/*Adds the layout to the Jframe*/
 		add(top,BorderLayout.PAGE_START);
 		add(bottom, BorderLayout.CENTER);
-		//Start the timer
+		/*Start the timer*/
 		int delay = 1000; //milliseconds
 		ActionListener taskPerformer = new ActionListener() {
-
+		/*Anonymous Class that incremements the timer*/
 			public void actionPerformed(ActionEvent evt) {
 				timer.setText(String.valueOf(time++));
 			}
 
 		};
+		/*Initializes the timer*/
 		Jtimer = new Timer(delay, taskPerformer);
-
+		
+		/*Shrinks it to the smallest size*/
 		pack();
 		setVisible(true);
 	}
+	/*****************************************/
+	
+	/*
+	 * Controls the events from the mouse 
+	 */
 	private class MainMouseListener implements MouseListener{
-		private int counter[][] = new int[10][10];
+		/*Counter for each button*/
 		@Override
 		public void mouseClicked(MouseEvent e) {
-
+			
 			char state[] ={'M', '?',' '};
 			if(!gameEnded){
-				//This creates support for flags
-				for(int i=0; i<10; i++)
-				{
-					for(int j=0; j<10; j++)
-					{
-						if(buttonGrid[i][j] == e.getSource())
-						{
+				/*This allows the user to enable the flags*/
+				for(int i=0; i<10; i++) {
+					for(int j=0; j<10; j++) {
+						if(buttonGrid[i][j] == e.getSource()) {
 							if(SwingUtilities.isRightMouseButton(e) && e.getClickCount() == 1){
 
 								if(counter[i][j]%3==0)
@@ -181,25 +202,23 @@ public class MainWindow extends JFrame {
 		public void mouseReleased(MouseEvent e) {		}
 	}
 
-
+	/*
+	 * Controls the menu and buttons 
+	 */
 	private class MainWindowListener implements ActionListener{
 		@Override
 		public void actionPerformed(ActionEvent e) 
 		{
-			//If the lost flag is false then preform the action
+			/*If the games over, don't do anything else*/
 			if(!gameEnded){
-				for(int i=0; i<10; i++)
-				{
-					for(int j=0; j<10; j++)
-					{
-						if(buttonGrid[i][j] == e.getSource())
-						{
-							if(board.get(i, j)<0)
-							{	
+				for(int i=0; i<10; i++) {
+					for(int j=0; j<10; j++) {
+						if(buttonGrid[i][j] == e.getSource()) {
+							if(board.get(i, j)<0) {	
 								Jtimer.stop();
 								JOptionPane.showMessageDialog(null, "You Lose.");
 								gameEnded=true;
-								//read in the image and set the icon of the bomb
+								/*Read in the image and set the icon of the bomb*/
 								try {
 									Image img = ImageIO.read(getClass().getResource("/bombrevealed.gif"));
 									buttonGrid[i][j].setIcon(new ImageIcon(img));
@@ -207,17 +226,17 @@ public class MainWindow extends JFrame {
 									ex.printStackTrace();
 								}
 							}else if(board.get(i, j)>0){
-								// if there isnt a bomb display the number corresponding to the
-								// location of the bomb
+								/*This shows the number of bombs that are surrounding that button*/
 								Jtimer.start();
 								buttonGrid[i][j].setText(Integer.toString(board.get(i,j)));
 								board.setVisible(i, j);
 							}else{
-								//if the grid is 0 then reveal the buttons
+								/*if the grid is 0 then reveal the buttons*/
 								Jtimer.start();
 								reveal(i,j);
 							}
-
+							
+							/*If the user won the game, give them option to enter their name*/
 							if(board.isWon()){
 								while(true){
 									String playerName = (String)JOptionPane.showInputDialog(
@@ -229,11 +248,11 @@ public class MainWindow extends JFrame {
 											null,
 											"");
 
-									//If a string was returned, say so.
+									/*Save the string that was entered*/
 									if ((playerName != null) && (playerName.length() > 0)) {
 										topTenScores.add(new Player(playerName,time));
 										break;
-										//exit the loop
+										/*exit the loop*/
 									}
 									gameEnded=true;
 								}
@@ -244,6 +263,7 @@ public class MainWindow extends JFrame {
 
 
 			}
+			/*Asking for a new game*/
 			if(newGame==e.getSource()){
 				int n = JOptionPane.showConfirmDialog(
 						null,
@@ -252,22 +272,24 @@ public class MainWindow extends JFrame {
 						JOptionPane.YES_NO_OPTION);
 				if(n==0){
 
-					//reset all variables
+					/*reset all variables*/
 					gameEnded=false;
 					time=0;
 					timer.setText("0");
-					//create a new board
+					/*create a new board*/
 					board = new MinesweeperBoard(board.length(),board.width(),board.getMines());
-					//clear the board.
+					/*clear the board.*/
 					for(int i=0; i<board.length(); i++){
 						for(int j=0; j<board.width(); j++){
 							buttonGrid[i][j].setText(" ");
 							buttonGrid[i][j].setIcon(null);
+							counter[i][j]=0;
 						}
 					}
 				}
 
 			}
+			/*Displays the top ten scores*/
 			if(topTen==e.getSource()){
 				Collections.sort(topTenScores);
 				String players= "";
@@ -279,14 +301,17 @@ public class MainWindow extends JFrame {
 				}
 				JOptionPane.showMessageDialog(null, players);
 			}
+			/*exit*/
 			if(exit==e.getSource()){
 				System.exit(0);
 			}
+			/*Display the rules of the game*/
 			if(helpMenu == e.getSource())
 			{
 				JOptionPane.showMessageDialog(null, "The purpose of the game is to reveal all the squares excluding the mines.\n"
 						+ " Left click to reveal a square/bomb. Right click to mark a bomb. Good Luck!");
 			}
+			/*Give user option to clear top scores*/
 			if(resetScores == e.getSource())
 			{
 				int n = JOptionPane.showConfirmDialog(
@@ -298,13 +323,19 @@ public class MainWindow extends JFrame {
 					topTenScores.clear();
 				}
 			}
+			/*"About" section*/
 			if(about == e.getSource())
 			{
 				JOptionPane.showMessageDialog(null, "Made by:\n"
 						+ "Brian Herman and Diana Carrillo.");
 			}
 		}
-
+		/*Flood fill algorithm to reveal the squares*/
+		/**
+		 * Flood Fill Algorithm to reveal the squares
+		 * @param i
+		 * @param j
+		 */
 		public void reveal(int i, int j)
 		{
 			if(i>=0 && j>=0 || i<board.length() && j<board.width()){
