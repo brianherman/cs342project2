@@ -73,8 +73,8 @@ public class MainWindow extends JFrame {
 		
 		file.add(newGame);
 		file.add(topTen);
-		file.add(exit);
 		file.add(resetScores);
+		file.add(exit);
 
 		help.add(helpMenu);
 		help.add(about);
