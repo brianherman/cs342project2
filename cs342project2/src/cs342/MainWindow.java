@@ -29,6 +29,9 @@ public class MainWindow extends JFrame {
 
 	public static void main(String args[])
 	{
+		if (System.getProperty("os.name").contains("Mac")) {
+			System.setProperty("apple.laf.useScreenMenuBar", "true");
+		}
 		MainWindow mw = new MainWindow(10,10,10);
 		mw.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
@@ -50,7 +53,7 @@ public class MainWindow extends JFrame {
 		file.setMnemonic('G');
 		menuBar.add(file);
 		menuBar.add(help);
-		
+
 		newGame = new JMenuItem("Reset");
 		newGame.setMnemonic('R');
 		topTen = new JMenuItem("Top Ten Scores");
@@ -70,7 +73,7 @@ public class MainWindow extends JFrame {
 		helpMenu.addActionListener(mwl);
 		about.addActionListener(mwl);
 		resetScores.addActionListener(mwl);
-		
+
 		file.add(newGame);
 		file.add(topTen);
 		file.add(resetScores);
@@ -78,7 +81,7 @@ public class MainWindow extends JFrame {
 
 		help.add(helpMenu);
 		help.add(about);
-		
+
 		setJMenuBar(menuBar);
 		//end setup of the menubar
 		//setup the layouts one will be 
@@ -123,38 +126,44 @@ public class MainWindow extends JFrame {
 		setVisible(true);
 	}
 	private class MainMouseListener implements MouseListener{
-		private int counter=0;
+		private int counter[][] = new int[10][10];
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			char f[] ={'M', '?',' '};
-			//This creates support for flags
-			for(int i=0; i<10; i++)
-			{
-				for(int j=0; j<10; j++)
+
+			char state[] ={'M', '?',' '};
+			if(!gameEnded){
+				//This creates support for flags
+				for(int i=0; i<10; i++)
 				{
-					if(buttonGrid[i][j] == e.getSource())
+					for(int j=0; j<10; j++)
 					{
-						if(SwingUtilities.isRightMouseButton(e) && e.getClickCount() == 1){
+						if(buttonGrid[i][j] == e.getSource())
+						{
+							if(SwingUtilities.isRightMouseButton(e) && e.getClickCount() == 1){
 
-							if(counter%3==0)
-							{
-								buttonGrid[i][j].setEnabled(false);
-								buttonGrid[i][j].setText(String.valueOf(f[counter%3]));
-								counter++;
-							}else if(counter%3==1){
-								buttonGrid[i][j].setEnabled(false);
-								buttonGrid[i][j].setText(String.valueOf(f[counter%3]));
-								counter++;
-							}else if(counter%3==2){
-								buttonGrid[i][j].setEnabled(true);
-								buttonGrid[i][j].setText(String.valueOf(f[counter%3]));
-								counter++;
+								if(counter[i][j]%3==0)
+								{
+									buttonGrid[i][j].setEnabled(false);
+									buttonGrid[i][j].setText(String.valueOf(state[counter[i][j]%3]));
+									counter[i][j]++;
+									flagsCounter--;
+								}else if(counter[i][j]%3==1){
+									buttonGrid[i][j].setEnabled(false);
+									buttonGrid[i][j].setText(String.valueOf(state[counter[i][j]%3]));
+									counter[i][j]++;
+								}else if(counter[i][j]%3==2){
+									buttonGrid[i][j].setEnabled(true);
+									buttonGrid[i][j].setText(String.valueOf(state[counter[i][j]%3]));
+									counter[i][j]++;
+									flagsCounter++;
+								}
+
+								flags.setText(String.valueOf(flagsCounter));
+
 							}
-						flags.setText(String.valueOf(flagsCounter));
-
 						}
-					}
 
+					}
 				}
 			}
 		}
@@ -232,15 +241,15 @@ public class MainWindow extends JFrame {
 						}
 					}
 				}
-				
+
 
 			}
 			if(newGame==e.getSource()){
 				int n = JOptionPane.showConfirmDialog(
-					    null,
-					    "Are you sure you want to start a new game?",
-					    null,
-					    JOptionPane.YES_NO_OPTION);
+						null,
+						"Are you sure you want to start a new game?",
+						null,
+						JOptionPane.YES_NO_OPTION);
 				if(n==0){
 
 					//reset all variables
@@ -257,7 +266,7 @@ public class MainWindow extends JFrame {
 						}
 					}
 				}
-				
+
 			}
 			if(topTen==e.getSource()){
 				Collections.sort(topTenScores);
@@ -281,10 +290,10 @@ public class MainWindow extends JFrame {
 			if(resetScores == e.getSource())
 			{
 				int n = JOptionPane.showConfirmDialog(
-					    null,
-					    "Are you sure you want to reset the scores?",
-					    null,
-					    JOptionPane.YES_NO_OPTION);
+						null,
+						"Are you sure you want to reset the scores?",
+						null,
+						JOptionPane.YES_NO_OPTION);
 				if(n==0){
 					topTenScores.clear();
 				}
@@ -299,7 +308,7 @@ public class MainWindow extends JFrame {
 		public void reveal(int i, int j)
 		{
 			if(i>=0 && j>=0 || i<board.length() && j<board.width()){
-				if(board.get(i, j)==0 && board.revealed(i, j)==false)
+				if(board.get(i, j)==0 && board.revealed(i, j)==false && buttonGrid[i][j].isEnabled())
 				{
 					board.setVisible(i, j);
 					buttonGrid[i][j].setText(Integer.toString(board.get(i,j)));
