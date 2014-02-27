@@ -13,6 +13,6 @@ public class Player implements Comparable<Player>{
 		return p.score - score;
 	}
 	public String toString(){
-		return name +" " + score;
+		return name +"," + score;
 	}
 }

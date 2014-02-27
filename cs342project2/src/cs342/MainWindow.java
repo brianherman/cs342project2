@@ -5,8 +5,11 @@ import javax.swing.*;
 
 import java.awt.*;
 import java.awt.event.*;
-
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -37,7 +40,7 @@ public class MainWindow extends JFrame {
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
 		}
 		/*Creates the window*/
-		MainWindow mw = new MainWindow(10,10,10);
+		MainWindow mw = new MainWindow(10,10,1);
 		mw.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 	}
 	/*****************************************/
@@ -121,7 +124,7 @@ public class MainWindow extends JFrame {
 				bottom.add(buttonGrid[i][j]);
 				buttonGrid[i][j].addActionListener(mwl);
 				buttonGrid[i][j].addMouseListener(mml);
-				//buttonGrid[i][j].setText(String.valueOf(board.get(i, j)));
+				buttonGrid[i][j].setText(String.valueOf(board.get(i, j)));
 			}
 		}
 		
@@ -139,6 +142,19 @@ public class MainWindow extends JFrame {
 		};
 		/*Initializes the timer*/
 		Jtimer = new Timer(delay, taskPerformer);
+		try {
+			/* Read the scores from the file */
+			BufferedReader b = new BufferedReader(new FileReader("scores.dat"));
+			String line = null;
+			while((line = b.readLine()) != null){
+				String split[] = line.split(",");
+				System.out.println("Adding " +split[0]+split[1]);
+				topTenScores.add(new Player(split[0],Integer.parseInt(split[1])));
+			}
+			b.close();
+		}catch (IOException e){
+			e.printStackTrace();
+		}
 		
 		/*Shrinks it to the smallest size*/
 		pack();
@@ -153,7 +169,6 @@ public class MainWindow extends JFrame {
 		/*Counter for each button*/
 		@Override
 		public void mouseClicked(MouseEvent e) {
-			
 			char state[] ={'M', '?',' '};
 			if(!gameEnded){
 				/*This allows the user to enable the flags*/
@@ -254,7 +269,18 @@ public class MainWindow extends JFrame {
 										break;
 										/*exit the loop*/
 									}
+									
 									gameEnded=true;
+								}
+								try{
+									/* Write the scores to the file */
+									PrintWriter writer = new PrintWriter("scores.dat", "UTF-8");
+									for(Player p : topTenScores){
+										writer.println(p.toString());
+									}
+									writer.close();
+								}catch (IOException ex){
+									ex.printStackTrace();
 								}
 							}
 						}
@@ -294,7 +320,7 @@ public class MainWindow extends JFrame {
 				Collections.sort(topTenScores);
 				String players= "";
 				for(int i=0; i<topTenScores.size(); i++){
-					players=players+" " + i + ": "+ topTenScores.get(i).toString();
+					players=players+" " + i+1 + ": "+ topTenScores.get(i).toString() + "\n";
 				}
 				if(topTenScores.size()==0){
 					players="No scores.";
